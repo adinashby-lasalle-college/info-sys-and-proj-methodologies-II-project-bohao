@@ -118,19 +118,19 @@ public class ZombieController : MonoBehaviour
 
     void StateForUpdate()
     {
-        // float dis = PlayerController.Instance.PlayerState==PlayerState.Shoot?30f: 10f;
+        // float dis = Player_Controller.Instance.PlayerState==PlayerState.Shoot?30f: 10f;
         float dis = 10f;
         switch (zombieState)
         {
             case ZombieState.Idle:
                 break;
             case ZombieState.Walk:
-                // if (Vector3.Distance(transform.position, PlayerController.Instance.transform.position) < dis)
-                // {
-                //     // 去追玩家
-                //     ZombieState = ZombieState.Run;
-                //     return;
-                // }
+                if (Vector3.Distance(transform.position, Player_Controller.Instance.transform.position) < dis)
+                {
+                    // 去追玩家
+                    ZombieState = ZombieState.Run;
+                    return;
+                }
                 if (Vector3.Distance(target, transform.position) <= 1)
                 {
                     ZombieState = ZombieState.Idle;
@@ -139,11 +139,11 @@ public class ZombieController : MonoBehaviour
                 break;
             case ZombieState.Run:
                 // 一直追玩家
-                // navMeshAgent.SetDestination(PlayerController.Instance.transform.position);
-                // if (Vector3.Distance(transform.position, PlayerController.Instance.transform.position) < 2.5f)
-                // {
-                //     ZombieState = ZombieState.Attack;
-                // }
+                navMeshAgent.SetDestination(Player_Controller.Instance.transform.position);
+                if (Vector3.Distance(transform.position, Player_Controller.Instance.transform.position) < 2.5f)
+                {
+                    ZombieState = ZombieState.Attack;
+                }
 
                 break;
             case ZombieState.Attack:
