@@ -4,16 +4,47 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
 
-
+public enum PlayerState
+{
+    Move,
+    Shoot,
+    Reload
+}
 public class Player_Controller : MonoBehaviour
 {
     public static Player_Controller Instance;
    
     [SerializeField] FirstPersonController firstPersonController;
    [SerializeField] Image crossImage;
+   [SerializeField] WeaponBase[] weapons;
+   private int CurrentWeaponIndex = -1; //当前武器
+   private int previousWeaponIndex = -1;
+   private bool canChangeWeapon = true; //能否切换武器
+
+   public PlayerState PlayerState;
+
+   //修改玩家状态
+   public void ChangePlayerState(PlayerState newState)
+   {
+    PlayerState = newState;
+    //武器在进入某个状态时候，或许需要做事情
+    weapons[CurrentWeaponIndex].OnEnterPlayeState(newState);
+   }
     public void Awake()
     {
         Instance = this;
+        //初始化所有武器
+        for (int i = 0; i < weapons.Length; i++)
+        {
+           
+            
+              weapons[i].Init(this);   
+            
+           
+        }
+        PlayerState = PlayerState.Move;
+        //默认第一把武器
+        ChangeWeapon(0);//测试手枪
 
 
 
@@ -25,13 +56,20 @@ public class Player_Controller : MonoBehaviour
 
     private void Update()
     {
-        //testing
-        if(Input.GetMouseButtonDown(0))
+                //驱动武器层
+        weapons[CurrentWeaponIndex].OnUpdatePlayeState(PlayerState);
+        //按键检查切换武器
+        if(canChangeWeapon == false) return;
+        if (Input.GetKeyDown(KeyCode.Alpha1))ChangeWeapon(0);
+        else if (Input.GetKeyDown(KeyCode.Alpha2))ChangeWeapon(1);
+        else if (Input.GetKeyDown(KeyCode.Alpha3))ChangeWeapon(2);
+        if (Input.GetKeyDown(KeyCode.Q))
         {
-            StartShootRecoil(1);
+            if(previousWeaponIndex >=0)ChangeWeapon(previousWeaponIndex);
+
         }
     }
-
+#region 后坐力
     public void StartShootRecoil(float recoil = 1)
     {
         StartCoroutine(ShootRecoil_Cross(recoil));
@@ -75,8 +113,53 @@ public class Player_Controller : MonoBehaviour
         firstPersonController.xRotOffset = 0;
         firstPersonController.yRotOffset = 0;
     }    
+#endregion
     public void Hurt(float damage)
     {
+
+    }
+
+    private void ChangeWeapon(int newIndex)
+    {
+        //是否重复
+        if(CurrentWeaponIndex == newIndex) return;
+        //上一个武器的索引 = 当前武器
+        previousWeaponIndex = CurrentWeaponIndex;
+        // 记录新的武器索引
+        CurrentWeaponIndex = newIndex;
+        //如果是第一次使用
+        if(previousWeaponIndex < 0)
+        {
+            //直接进入当前武器
+            weapons[CurrentWeaponIndex].Enter();
+        }
+        else
+        {
+            //退出当前武器
+            weapons[previousWeaponIndex].Exit(OnWeaponExitOver);
+            canChangeWeapon =false;
+
+        }
+
+
         
     }
+    private void OnWeaponExitOver()
+    {
+        canChangeWeapon = true;
+        weapons[CurrentWeaponIndex].Enter();
+    }
+
+    public void InitForEnterWeapon(bool wantCrosshair,bool wantBullet)
+    {
+        crossImage.gameObject.SetActive(wantCrosshair);
+        UI_MainPanel.Instance.InitForEnterWeapon(wantBullet);
+    }
+
+
+
+
+
+
+
 }
