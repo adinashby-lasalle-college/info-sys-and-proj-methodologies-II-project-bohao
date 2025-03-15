@@ -2741,11 +2741,11 @@ MonoBehaviour:
   curr_MaxBulletNum: 0
   standby_MaxBulletNum: 0
   attackValue: 0
-  wantCrosshair: 0
+  wantCrosshair: 1
   wantBullet: 0
   wanrShootEF: 0
   wantRecoil: 0
-  recoilStrength: 0
+  recoilStrength: 1
   canThoughWall: 0
   audioClips: []
 --- !u!1 &1738009504 stripped
