@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -34,10 +36,15 @@ public abstract class WeaponBase : MonoBehaviour
     public bool wantRecoil;      // 是否有后坐力
     public float recoilStrength; // 后坐力强度
     public bool canThoughWall;   // 是否穿墙射击
+    protected bool isLeftAttack =true;
+    protected bool canShoot = false;
+    private bool wantReloadOnEnter = false;
     #endregion
 
     #region 效果 & 音效
-    public AudioClip[] audioClips;  // 本武器的多段音效
+    [SerializeField] AudioClip[] audioClips;  // 本武器的多段音效
+    [SerializeField] GameObject[] prefab_BulletEF; //子弹效果
+    [SerializeField] GameObject shootEF; //射击火花
     #endregion
 
     /// <summary>
@@ -67,9 +74,28 @@ public abstract class WeaponBase : MonoBehaviour
     /// </summary>
     public virtual void Enter()
     {
+          gameObject.SetActive(true);
+            if (audioSource != null) audioSource.enabled = true;
         // 给UI显示准星或子弹
         player.InitForEnterWeapon(wantCrosshair, wantBullet);
-
+        canShoot = false;
+        //更新子弹数量
+        if(wantBullet)
+        {
+            player.UpdateBulletUI(curr_BulletNum,curr_MaxBulletNum,standby_BulletNum);
+            if(curr_BulletNum > 0)
+            {
+                PlayAudio(0);
+            }
+            else
+            {
+                wantReloadOnEnter =true;
+            }
+        }
+        if(shootEF!=null)
+        {
+            shootEF.SetActive(false);
+        }
         // 启用武器物体
         gameObject.SetActive(true);
 
@@ -104,6 +130,12 @@ public abstract class WeaponBase : MonoBehaviour
     /// </summary>
     private void EnterOver()
     {
+       canShoot =true;
+       if(wantReloadOnEnter)
+       {
+        player.ChangePlayerState(PlayerState.Reload);
+       }
+       
         // 视具体需求处理
         Debug.Log($"{gameObject.name} Enter animation finished.");
     }
@@ -119,5 +151,77 @@ public abstract class WeaponBase : MonoBehaviour
         // 调用在Exit()里设置的回调，把控制权还给Player_Controller
         onExitOver?.Invoke();
     }
+    public virtual void ShootOver()
+    {
+        canShoot = true;
+        if(wanrShootEF) shootEF.SetActive(false);
+        if(player.PlayerState == PlayerState.Shoot)
+        {
+            player.ChangePlayerState(PlayerState.Move);
+        }
+    }
     #endregion
+    protected virtual void OnLeftAttack()
+    {
+        if(wantBullet)
+        {
+            curr_BulletNum--;
+            player.UpdateBulletUI(curr_BulletNum,curr_MaxBulletNum,standby_BulletNum);
+
+
+        }
+        canShoot =false;
+        animator.SetTrigger("Shoot");
+        if(wanrShootEF) shootEF.SetActive(true);
+
+        if(wantRecoil) player.StartShootRecoil(recoilStrength);
+
+        PlayAudio(1);
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if(Physics.Raycast(ray,out RaycastHit hitInfo,1500f))
+        {
+            HitGameObject(hitInfo);
+        }
+
+
+
+    }
+    private void HitGameObject(RaycastHit hitInfo)
+    {
+        //判断是否攻击到僵尸
+        if(hitInfo.collider.gameObject.CompareTag("Zombie"))
+        {
+            GameObject go = Instantiate(prefab_BulletEF[1],hitInfo.point, Quaternion.identity);
+            go.transform.LookAt(Camera.main.transform);
+            ZombieController zombie = hitInfo.collider.gameObject.GetComponent<ZombieController>();
+            if(zombie == null) zombie =hitInfo.collider.gameObject.GetComponentInParent<ZombieController>();
+            zombie.Hurt(attackValue);
+        }
+        else if(hitInfo.collider.gameObject!=player.gameObject)
+        {
+            GameObject go = Instantiate(prefab_BulletEF[0],hitInfo.point, Quaternion.identity);
+            go.transform.LookAt(Camera.main.transform);
+        }
+    }
+
+    protected void PlayAudio(int index)
+    {
+        audioSource.PlayOneShot(audioClips[index]);
+    }
+    private void ReloadOver()
+    {
+        //填充子弹
+        int want = curr_MaxBulletNum - curr_BulletNum;
+        if(standby_BulletNum -want < 0)
+        {
+             want = standby_BulletNum;
+        }
+        standby_BulletNum -=want;
+        curr_BulletNum +=want;
+        player.UpdateBulletUI(curr_BulletNum,curr_MaxBulletNum,standby_BulletNum);
+        animator.SetBool("Reload",false);
+         canShoot = true; 
+        player.ChangePlayerState(PlayerState.Move);
+    }
+
 }

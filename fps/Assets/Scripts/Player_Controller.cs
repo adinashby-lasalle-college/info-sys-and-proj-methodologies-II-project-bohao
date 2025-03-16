@@ -156,7 +156,12 @@ public class Player_Controller : MonoBehaviour
         UI_MainPanel.Instance.InitForEnterWeapon(wantBullet);
     }
 
+    public void UpdateBulletUI(int curr_BulletNum,int curr_MaxBulletNum,int standby_BulletNum)
+    {
+        UI_MainPanel.Instance.UpdateCurrBullet_Text(curr_BulletNum,curr_MaxBulletNum);
+        UI_MainPanel.Instance.UpdateStandByBullet_Text(standby_BulletNum);
 
+    }
 
 
 

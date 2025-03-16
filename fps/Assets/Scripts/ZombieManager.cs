@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,9 +6,9 @@ public class ZombieManager : MonoBehaviour
 {
     public static ZombieManager Instance;
     public GameObject prefab_Zombie;
-    public List<ZombieController> zombies;
+    public List<ZombieController> zombies;//当前场景中僵尸
 
-    private Queue<ZombieController> zombiePool = new Queue<ZombieController>();
+    private Queue<ZombieController> zombiePool = new Queue<ZombieController>();//备用僵尸
     public Transform Pool;
     private void Awake()
     {
