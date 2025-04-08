@@ -1,4 +1,4 @@
-using System.Collections;
+    using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,6 +16,7 @@ public class Player_Controller : MonoBehaviour
    
     [SerializeField] FirstPersonController firstPersonController;
    [SerializeField] Image crossImage;
+   [SerializeField]Camera[] cameras;
    [SerializeField] WeaponBase[] weapons;
    private int CurrentWeaponIndex = -1; //当前武器
    private int previousWeaponIndex = -1;
@@ -26,6 +27,7 @@ public class Player_Controller : MonoBehaviour
    //修改玩家状态
    public void ChangePlayerState(PlayerState newState)
    {
+     Debug.Log($"[Player_Controller] ChangePlayerState -> {newState}");  // <<< 调试日志
     PlayerState = newState;
     //武器在进入某个状态时候，或许需要做事情
     weapons[CurrentWeaponIndex].OnEnterPlayeState(newState);
@@ -44,7 +46,7 @@ public class Player_Controller : MonoBehaviour
         }
         PlayerState = PlayerState.Move;
         //默认第一把武器
-        ChangeWeapon(0);//测试手枪
+        ChangeWeapon(1);//测试手枪
 
 
 
@@ -162,7 +164,13 @@ public class Player_Controller : MonoBehaviour
         UI_MainPanel.Instance.UpdateStandByBullet_Text(standby_BulletNum);
 
     }
-
+    public void SetCameraView(int value)
+    {
+        for(int i = 0;i<cameras.Length;i++)
+        {
+            cameras[i].fieldOfView =value;
+        }
+    }
 
 
 

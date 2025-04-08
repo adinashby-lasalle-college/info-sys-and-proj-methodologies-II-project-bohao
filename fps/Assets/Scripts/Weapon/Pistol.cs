@@ -32,7 +32,7 @@ public class Pistol : WeaponBase
             player.ChangePlayerState(PlayerState.Reload);
             return;
           }
-          if(standby_BulletNum > 0 && Input.GetKeyDown(KeyCode.R))
+          if(standby_BulletNum > 0 && Input.GetKeyDown(KeyCode.E))
           {
             player.ChangePlayerState(PlayerState.Reload);
             return;
