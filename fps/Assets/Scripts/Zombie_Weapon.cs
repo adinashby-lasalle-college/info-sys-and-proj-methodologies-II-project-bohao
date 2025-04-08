@@ -27,7 +27,7 @@ public class Zombie_Weapon : MonoBehaviour
         if (!isAttacked&&other.gameObject.tag == "Player")
         {
             isAttacked = true;
-            // PlayerController.Instance.Hurt(10);
+            Player_Controller.Instance.Hurt(10);
         }
     }
 }

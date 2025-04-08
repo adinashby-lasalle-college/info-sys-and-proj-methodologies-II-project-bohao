@@ -18,11 +18,13 @@ public class Player_Controller : MonoBehaviour
    [SerializeField] Image crossImage;
    [SerializeField]Camera[] cameras;
    [SerializeField] WeaponBase[] weapons;
+    [SerializeField] int hp = 100;
    private int CurrentWeaponIndex = -1; //当前武器
    private int previousWeaponIndex = -1;
    private bool canChangeWeapon = true; //能否切换武器
+    private bool isDead = false;
 
-   public PlayerState PlayerState;
+    public PlayerState PlayerState;
 
    //修改玩家状态
    public void ChangePlayerState(PlayerState newState)
@@ -114,12 +116,33 @@ public class Player_Controller : MonoBehaviour
         }
         firstPersonController.xRotOffset = 0;
         firstPersonController.yRotOffset = 0;
-    }    
-#endregion
-    public void Hurt(float damage)
-    {
-
     }
+    #endregion
+    public void Hurt(int damage)
+    {
+        if (isDead) return;
+
+        hp -= damage;
+        if (hp < 0) hp = 0;
+
+        UI_MainPanel.Instance.UpdateHP_Text(hp);
+
+        if (hp == 0)
+        {
+            isDead = true;
+            Die();
+        }
+    }
+    private void Die()
+    {
+        Debug.Log("[Player] Died");
+    #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+    #else
+        Application.Quit();
+    #endif
+    }
+
 
     private void ChangeWeapon(int newIndex)
     {

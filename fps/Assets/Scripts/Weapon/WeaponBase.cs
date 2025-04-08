@@ -36,15 +36,14 @@ public abstract class WeaponBase : MonoBehaviour
     public bool wantRecoil;      // 是否有后坐力
     public float recoilStrength; // 后坐力强度
     public bool canThoughWall;   // 是否穿墙射击
-    protected bool isLeftAttack =true;
     protected bool canShoot = false;
     private bool wantReloadOnEnter = false;
     #endregion
 
     #region 效果 & 音效
     [SerializeField] AudioClip[] audioClips;  // 本武器的多段音效
-    [SerializeField] GameObject[] prefab_BulletEF; //子弹效果
-    [SerializeField] GameObject shootEF; //射击火花
+    [SerializeField] protected GameObject[] prefab_BulletEF; //子弹效果
+    [SerializeField] protected GameObject shootEF; //射击火花
     #endregion
 
     /// <summary>
@@ -178,10 +177,27 @@ public abstract class WeaponBase : MonoBehaviour
 
         PlayAudio(1);
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (canThoughWall)
+        {
+            RaycastHit[] raycastHits = Physics.RaycastAll(ray,1500f);
+
+                for (int i = 0; i < raycastHits.Length; i++)
+                {
+                   HitGameObject(raycastHits[i]);
+
+                     
+
+                }
+        
+        }
+        else
+        {
         if(Physics.Raycast(ray,out RaycastHit hitInfo,1500f))
         {
             HitGameObject(hitInfo);
         }
+        }
+
 
 
 
