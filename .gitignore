@@ -1,2 +1,36 @@
+# Unity 自动生成的目录（不要提交）
+Library/
+Temp/
+Logs/
+UserSettings/
+
+# Visual Studio / Rider 生成的文件（如果你用 VS/Rider 作为 IDE）
+.vs/
+*.sln
+*.csproj
+*.unityproj
+*.suo
+*.user
+*.booproj
+*.pidb
+*.svd
+*.pdb
+*.opendb
+*.VC.db
+
+# LFS 相关
+*.lfsconfig
+
+# 构建文件（不要提交）
+Build/
+Builds/
+Assets/StreamingAssets/*.manifest
+Assets/StreamingAssets/*.hash
+*.apk
+*.aab
+*.unitypackage
+
+# MacOS / Windows 无用文件
 .DS_Store
-imgs/.DS_Store
+Thumbs.db
+
