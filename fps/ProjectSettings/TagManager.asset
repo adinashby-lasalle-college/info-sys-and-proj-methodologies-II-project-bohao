@@ -8,6 +8,7 @@ TagManager:
   - FxTemporaire
   - Fire
   - Boss
+  - BossAttack
   layers:
   - Default
   - TransparentFX

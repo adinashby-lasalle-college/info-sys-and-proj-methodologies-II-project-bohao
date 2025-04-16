@@ -66,6 +66,8 @@ public class BossController : MonoBehaviour
     // 头部受击额外伤害系数
     private float headShotMultiplier = 1.5f;
 
+    [SerializeField] private GameObject attackTriggerObject; // 👈 攻击触发器的引用（AttackTrigger）
+
     // 状态切换时的逻辑
     public BossState BossState
     {
@@ -280,6 +282,9 @@ public class BossController : MonoBehaviour
         
         hp = maxHp;
         BossState = BossState.Idle;
+        if (attackTriggerObject != null)
+            attackTriggerObject.SetActive(false); // 启动时关闭
+
     }
 
     void OnEnable()
@@ -545,7 +550,29 @@ public class BossController : MonoBehaviour
             Debug.Log($"手动测试：对玩家造成{attackDamage}点伤害");
         }
     }
+    public void EnableAttackTrigger()
+    {
+        if (attackTriggerObject != null)
+            attackTriggerObject.SetActive(true);
 
+        // 调用启用伤害
+        attackTriggerObject.GetComponent<AttackTrigger>()?.EnableDamage();
+
+        if (showDebugInfo)
+            Debug.Log("攻击触发器启用");
+    }
+
+    public void DisableAttackTrigger()
+    {
+        if (attackTriggerObject != null)
+            attackTriggerObject.SetActive(false);
+
+        // 调用关闭伤害
+        attackTriggerObject.GetComponent<AttackTrigger>()?.DisableDamage();
+
+        if (showDebugInfo)
+            Debug.Log("攻击触发器禁用");
+    }
     #region 动画事件
     void IdelAudio()
     {
