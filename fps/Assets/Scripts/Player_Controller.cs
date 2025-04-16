@@ -142,7 +142,9 @@ public class Player_Controller : MonoBehaviour
         // 显示鼠标并解除锁定
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
-    
+
+        Time.timeScale = 1f;
+
         // 加载GameOver场景
         SceneManager.LoadScene("GameOver");
     }

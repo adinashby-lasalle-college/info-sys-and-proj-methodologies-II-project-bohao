@@ -6973,7 +6973,7 @@ MonoBehaviour:
   - {fileID: 1218268652}
   - {fileID: 947211275}
   - {fileID: 1574687602}
-  hp: 100
+  hp: 1000
   PlayerState: 0
 --- !u!114 &1738009513 stripped
 MonoBehaviour:

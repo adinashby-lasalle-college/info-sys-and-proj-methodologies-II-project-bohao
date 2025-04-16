@@ -242,6 +242,16 @@ public class BossController : MonoBehaviour
                 
             BossState = BossState.Run;
         }
+        // 攻击完成后切换状态
+        if (bossState == BossState.Attack)
+        {
+            BossState = BossState.Run;
+
+            // 补上动画参数，防止卡住
+            animator.SetTrigger("Attack"); // 清除Trigger
+            animator.ResetTrigger("Attack");
+            animator.SetBool("Run", true);  // <-- 确保动画状态机能走到 Run
+        }
     }
 
     void Start()
