@@ -15,11 +15,11 @@ public class MissionSystem : MonoBehaviour
     [SerializeField] private string zombieMissionDesc = "Eliminate zombies in the area";
     private string zombieTag = "Zombie"; // 注意大写Z
     
-    [Header("Mission 2 - Supply Run")]
-    [SerializeField] private int supplyMissionTarget = 3;
-    [SerializeField] private string supplyMissionTitle = "Supply Run";
-    [SerializeField] private string supplyMissionDesc = "Collect medical supplies";
-    [SerializeField] private string supplyMissionTag = "medkit";
+    [Header("Mission 2 - Boss Hunter")]
+    [SerializeField] private int bossMissionTarget = 1; // 只需击杀一个僵尸王
+    [SerializeField] private string bossMissionTitle = "Zombie King";
+    [SerializeField] private string bossMissionDesc = "Eliminate the Huge Scary Zombie";
+    [SerializeField] private string bossTag = "Boss"; // 僵尸王标签
     
     // 任务状态跟踪
     private Mission currentMission;
@@ -61,6 +61,7 @@ public class MissionSystem : MonoBehaviour
         
         Debug.Log("MissionSystem initialized. First mission available: " + isMission1Available);
         Debug.Log($"Zombie mission will track enemies with tag: '{zombieTag}'");
+        Debug.Log($"Boss mission will track enemies with tag: '{bossTag}'");
     }
 
     private void Update()
@@ -156,7 +157,8 @@ public class MissionSystem : MonoBehaviour
                     Debug.Log("Accepting mission 2. Hiding exclamation mark.");
                 }
                 
-                AcceptMission("mission2", supplyMissionTitle, supplyMissionDesc, supplyMissionTarget, supplyMissionTag);
+                // 使用Boss标签的僵尸王任务
+                AcceptMission("mission2", bossMissionTitle, bossMissionDesc, bossMissionTarget, bossTag);
             }
         }
         else if (currentMission.status == Mission.MissionStatus.Completed)

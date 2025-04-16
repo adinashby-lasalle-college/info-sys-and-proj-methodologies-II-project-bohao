@@ -204,20 +204,51 @@ public abstract class WeaponBase : MonoBehaviour
     }
     private void HitGameObject(RaycastHit hitInfo)
     {
-        //判断是否攻击到僵尸
+        //判断是否攻击到僵尸或Boss
         if(hitInfo.collider.gameObject.CompareTag("Zombie"))
         {
-            GameObject go = Instantiate(prefab_BulletEF[1],hitInfo.point, Quaternion.identity);
+            // 生成僵尸被击中特效
+            GameObject go = Instantiate(prefab_BulletEF[1], hitInfo.point, Quaternion.identity);
             go.transform.LookAt(Camera.main.transform);
+    
+            // 获取僵尸控制器并造成伤害
             ZombieController zombie = hitInfo.collider.gameObject.GetComponent<ZombieController>();
-            if(zombie == null) zombie =hitInfo.collider.gameObject.GetComponentInParent<ZombieController>();
+            if(zombie == null) zombie = hitInfo.collider.gameObject.GetComponentInParent<ZombieController>();
             zombie.Hurt(attackValue);
         }
-        else if(hitInfo.collider.gameObject!=player.gameObject)
+        else if(hitInfo.collider.gameObject.CompareTag("Boss"))
         {
-            GameObject go = Instantiate(prefab_BulletEF[0],hitInfo.point, Quaternion.identity);
+            // 生成Boss被击中特效（可以使用与僵尸相同的特效或者使用专门的Boss特效）
+            GameObject go = Instantiate(prefab_BulletEF[1], hitInfo.point, Quaternion.identity);
+            go.transform.LookAt(Camera.main.transform);
+    
+            // 获取Boss控制器
+            BossController boss = hitInfo.collider.gameObject.GetComponent<BossController>();
+            if(boss == null) boss = hitInfo.collider.gameObject.GetComponentInParent<BossController>();
+
+            if(boss != null)
+            {
+                // 判断是否击中头部（通过检查碰撞器名称或标签）
+                bool isHeadshot = false;
+        
+                // 方法1：通过碰撞器名称判断（若您的头部碰撞器有特定命名）
+                if(hitInfo.collider.name.Contains("head") || hitInfo.collider == boss.headCollider)
+                {
+                    isHeadshot = true;
+            
+                }
+        
+       
+            boss.Hurt(attackValue, isHeadshot);
+            }
+        }
+        else if(hitInfo.collider.gameObject != player.gameObject)
+        {
+        // 击中其他物体的通用特效
+            GameObject go = Instantiate(prefab_BulletEF[0], hitInfo.point, Quaternion.identity);
             go.transform.LookAt(Camera.main.transform);
         }
+        
     }
 
     protected void PlayAudio(int index)
