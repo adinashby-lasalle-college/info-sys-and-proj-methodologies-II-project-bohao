@@ -7,6 +7,7 @@ public class UI_MainPanel : MonoBehaviour
 {
     public static UI_MainPanel Instance;
     public Text Hp_Text;
+    public Image Hp_CoverImage;    // 添加血量覆盖图层
     public Text CurrBullet_Text;
     public Image CurrBullet_Image;
     public Text StandByBullet_Text;
@@ -27,7 +28,17 @@ public class UI_MainPanel : MonoBehaviour
         {
             Hp_Text.color = Color.red;
         }
+        
+        // 更新血量覆盖图层
+        if (Hp_CoverImage != null)
+        {
+            // 假设最大血量为100，计算血量百分比
+            float healthPercentage = hp / 100f;
+            // 血量降低时，覆盖图增加
+            Hp_CoverImage.fillAmount = 1 - healthPercentage;
+        }
     }
+    
     public void UpdateCurrBullet_Text(int cur,int max)
     {
         CurrBullet_Text.text = cur + "/" + max;

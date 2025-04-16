@@ -1,8 +1,9 @@
-    using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
+using UnityEngine.SceneManagement;
 
 public enum PlayerState
 {
@@ -133,14 +134,17 @@ public class Player_Controller : MonoBehaviour
             Die();
         }
     }
+
     private void Die()
     {
         Debug.Log("[Player] Died");
-    #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-    #else
-        Application.Quit();
-    #endif
+    
+        // 显示鼠标并解除锁定
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+    
+        // 加载GameOver场景
+        SceneManager.LoadScene("GameOver");
     }
 
 
