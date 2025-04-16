@@ -23,6 +23,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI missionCompleteText;
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip missionCompleteSound;
+    [SerializeField] private GameObject missionCompleteTextObject;
     // 当前任务引用，用于快速更新进度
     private Mission currentMission;
     
@@ -153,9 +154,24 @@ public class UIManager : MonoBehaviour
     }
     public void ShowMissionCompleteMessage()
     {
-        StopAllCoroutines(); // 清除前一个UI协程
-        StartCoroutine(FadeMissionCompleteUI());
+        if (missionCompleteTextObject == null) return;
+
+        missionCompleteTextObject.SetActive(true); // 显示文本
+
+        // 播放音效（可选）
+        if (audioSource != null && missionCompleteSound != null)
+        {
+            audioSource.PlayOneShot(missionCompleteSound);
+        }
+
+        // 播放 Animator（它会自动从 Entry → MC_ScaleIn → MC_FadeOut → Exit）
+        Animator animator = missionCompleteTextObject.GetComponent<Animator>();
+        if (animator != null)
+        {
+            animator.Play("MC_ScaleIn", -1, 0f); // 从头播放
+        }
     }
+
     private IEnumerator FadeMissionCompleteUI()
     {
         missionCompleteText.text = "MISSION COMPLETE";
