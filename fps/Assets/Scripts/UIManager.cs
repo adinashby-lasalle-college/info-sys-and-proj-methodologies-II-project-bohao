@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
@@ -16,7 +17,12 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI missionTitleText;
     [SerializeField] private TextMeshProUGUI missionProgressText;
     [SerializeField] private TextMeshProUGUI missionDescriptionText;
-    
+
+    [Header("Mission Complete UI")]
+    [SerializeField] private CanvasGroup missionCompleteGroup;
+    [SerializeField] private TextMeshProUGUI missionCompleteText;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip missionCompleteSound;
     // 当前任务引用，用于快速更新进度
     private Mission currentMission;
     
@@ -145,4 +151,41 @@ public class UIManager : MonoBehaviour
             Debug.Log($"Progress text directly updated to: {progressText}");
         }
     }
+    public void ShowMissionCompleteMessage()
+    {
+        StopAllCoroutines(); // 清除前一个UI协程
+        StartCoroutine(FadeMissionCompleteUI());
+    }
+    private IEnumerator FadeMissionCompleteUI()
+    {
+        missionCompleteText.text = "MISSION COMPLETE";
+        missionCompleteGroup.alpha = 0;
+        missionCompleteGroup.gameObject.SetActive(true);
+
+        if (audioSource != null && missionCompleteSound != null)
+            audioSource.PlayOneShot(missionCompleteSound);
+
+        // 渐显
+        float t = 0;
+        while (t < 1f)
+        {
+            t += Time.deltaTime * 2f;
+            missionCompleteGroup.alpha = Mathf.Lerp(0f, 1f, t);
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(2f);
+
+        // 渐隐
+        t = 0;
+        while (t < 1f)
+        {
+            t += Time.deltaTime * 1.5f;
+            missionCompleteGroup.alpha = Mathf.Lerp(1f, 0f, t);
+            yield return null;
+        }
+
+        missionCompleteGroup.gameObject.SetActive(false);
+    }
+
 }

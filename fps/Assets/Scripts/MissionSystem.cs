@@ -216,26 +216,63 @@ public class MissionSystem : MonoBehaviour
         if (currentMission != null && currentMission.status == Mission.MissionStatus.Completed)
         {
             Debug.Log($"Mission delivered: {currentMission.missionTitle}");
-            
-            // 确保问号隐藏（添加额外保障）
+
+            // 隐藏问号图标
             if (questionMark != null)
             {
                 questionMark.SetActive(false);
             }
-            
-            // 更新UI
+
+            // 更新 UI
             HideAllPrompts();
             if (UIManager.Instance != null)
             {
                 UIManager.Instance.UpdateMissionTracker(null, false);
             }
-            
-            // 重置当前任务
+
+            // 保存当前任务 ID 后清除任务状态
+            string completedId = currentMission.missionId;
             currentMission.status = Mission.MissionStatus.Delivered;
             currentMission = null;
+
+            // 如果是 mission1，解锁 mission2
+            if (completedId == "mission1")
+            {
+                isMission1Completed = true;
+                isMission2Available = true;
+
+                if (exclamationMark != null)
+                {
+                    exclamationMark.SetActive(true);
+                    Debug.Log("Mission 2 unlocked! Showing exclamation mark.");
+                }
+            }
+
+            // ✅ 如果是 mission2（Boss任务），播放完成UI并延迟退出游戏
+            if (completedId == "mission2")
+            {
+                Debug.Log("🎯 Boss mission completed! Showing Mission Complete UI.");
+
+                if (UIManager.Instance != null)
+                {
+                    UIManager.Instance.ShowMissionCompleteMessage();
+                }
+
+                // 开始延迟结束游戏
+                StartCoroutine(EndGameAfterDelay(3f));
+            }
         }
     }
+    private IEnumerator EndGameAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
 
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+    Application.Quit();
+#endif
+    }
     public void UpdateMissionProgress(string tag, int amount = 1)
     {
         if (currentMission == null || 
