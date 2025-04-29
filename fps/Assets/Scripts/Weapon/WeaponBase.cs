@@ -139,7 +139,7 @@ public abstract class WeaponBase : MonoBehaviour
 
             if (boss != null)
             {
-                bool isHeadshot = hitInfo.collider.name.ToLower().Contains("eye") || hitInfo.collider == boss.headCollider;
+                bool isHeadshot = hitInfo.collider == boss.headCollider;
 
                 boss.Hurt(attackValue, isHeadshot);
 

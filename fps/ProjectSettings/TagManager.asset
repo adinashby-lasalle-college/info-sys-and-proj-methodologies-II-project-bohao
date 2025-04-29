@@ -9,6 +9,7 @@ TagManager:
   - Fire
   - Boss
   - BossAttack
+  - BossHead
   layers:
   - Default
   - TransparentFX
