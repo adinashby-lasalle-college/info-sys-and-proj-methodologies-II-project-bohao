@@ -214,6 +214,18 @@ public class BossController : MonoBehaviour
 
         if (hp <= 0)
         {
+            // 在死亡前更新任务进度
+            if (MissionSystem.Instance != null)
+            {
+                Debug.Log("Boss died! Updating mission progress with 'Boss' tag.");
+                MissionSystem.Instance.UpdateMissionProgress("Boss");
+            }
+            else
+            {
+                Debug.LogWarning("MissionSystem not found when Boss died!");
+            }
+            
+            // 现在调用死亡方法
             Die();
         }
         else

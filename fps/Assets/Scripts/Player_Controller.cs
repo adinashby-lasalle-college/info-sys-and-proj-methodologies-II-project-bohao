@@ -9,21 +9,32 @@ public enum PlayerState
 {
     Move,
     Shoot,
-    Reload
+    Reload,
+    Paused // 添加暂停状态
 }
 public class Player_Controller : MonoBehaviour
 {
     public static Player_Controller Instance;
    
     [SerializeField] FirstPersonController firstPersonController;
-   [SerializeField] Image crossImage;
-   [SerializeField]Camera[] cameras;
-   [SerializeField] WeaponBase[] weapons;
+    [SerializeField] Image crossImage;
+    [SerializeField] Camera[] cameras;
+    [SerializeField] WeaponBase[] weapons;
     [SerializeField] int hp = 100;
-   private int CurrentWeaponIndex = -1; //当前武器
-   private int previousWeaponIndex = -1;
-   private bool canChangeWeapon = true; //能否切换武器
+    [SerializeField] RawImage damageEffectPanel; // 伤害效果面板引用
+    [SerializeField] AudioClip hurtSoundClip; // 受伤音效
+    
+    private int CurrentWeaponIndex = -1; //当前武器
+    private int previousWeaponIndex = -1;
+    private bool canChangeWeapon = true; //能否切换武器
     private bool isDead = false;
+    private Coroutine damageEffectCoroutine; // 协程引用
+    
+    // 公共方法用于检查玩家是否死亡
+    public bool IsDead()
+    {
+        return isDead;
+    }
 
     public PlayerState PlayerState;
 
@@ -31,38 +42,45 @@ public class Player_Controller : MonoBehaviour
    public void ChangePlayerState(PlayerState newState)
    {
      Debug.Log($"[Player_Controller] ChangePlayerState -> {newState}");  // <<< 调试日志
-    PlayerState = newState;
-    //武器在进入某个状态时候，或许需要做事情
-    weapons[CurrentWeaponIndex].OnEnterPlayeState(newState);
+     PlayerState = newState;
+     
+     // 如果是暂停状态，不需要通知武器
+     if (newState != PlayerState.Paused && CurrentWeaponIndex >= 0)
+     {
+        //武器在进入某个状态时候，或许需要做事情
+        weapons[CurrentWeaponIndex].OnEnterPlayeState(newState);
+     }
    }
+   
     public void Awake()
     {
         Instance = this;
         //初始化所有武器
         for (int i = 0; i < weapons.Length; i++)
         {
-           
-            
-              weapons[i].Init(this);   
-            
-           
+            weapons[i].Init(this);   
         }
         PlayerState = PlayerState.Move;
         //默认第一把武器
         ChangeWeapon(1);//测试手枪
 
-
-
+        // 初始隐藏鼠标
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
-
-
-
-
 
     private void Update()
     {
-                //驱动武器层
-        weapons[CurrentWeaponIndex].OnUpdatePlayeState(PlayerState);
+        // 如果处于暂停状态，不处理武器和切换逻辑
+        if (PlayerState == PlayerState.Paused)
+            return;
+            
+        //驱动武器层
+        if (CurrentWeaponIndex >= 0)
+        {
+            weapons[CurrentWeaponIndex].OnUpdatePlayeState(PlayerState);
+        }
+        
         //按键检查切换武器
         if(canChangeWeapon == false) return;
         if (Input.GetKeyDown(KeyCode.Alpha1))ChangeWeapon(0);
@@ -71,9 +89,35 @@ public class Player_Controller : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q))
         {
             if(previousWeaponIndex >=0)ChangeWeapon(previousWeaponIndex);
-
         }
     }
+    
+    // 暂停游戏
+    public void PauseGame()
+    {
+        // 记住之前的状态，暂停时切换到暂停状态
+        ChangePlayerState(PlayerState.Paused);
+        
+        // 禁用FirstPersonController
+        if (firstPersonController != null)
+        {
+            firstPersonController.enabled = false;
+        }
+    }
+    
+    // 继续游戏
+    public void ResumeGame()
+    {
+        // 返回到移动状态
+        ChangePlayerState(PlayerState.Move);
+        
+        // 重新启用FirstPersonController
+        if (firstPersonController != null)
+        {
+            firstPersonController.enabled = true;
+        }
+    }
+
 #region 后坐力
     public void StartShootRecoil(float recoil = 1)
     {
@@ -127,12 +171,56 @@ public class Player_Controller : MonoBehaviour
         if (hp < 0) hp = 0;
 
         UI_MainPanel.Instance.UpdateHP_Text(hp);
+        
+        // 显示伤害效果
+        ShowDamageEffect();
+        
+        // 播放受伤音效
+        if (hurtSoundClip != null)
+        {
+            AudioSource.PlayClipAtPoint(hurtSoundClip, transform.position);
+        }
 
         if (hp == 0)
         {
             isDead = true;
             Die();
         }
+    }
+
+    // 伤害视觉效果方法
+    private void ShowDamageEffect()
+    {
+        // 如果damageEffectPanel为null，则直接返回
+        if (damageEffectPanel == null) return;
+        
+        // 如果已经有一个协程在运行，先停止它
+        if (damageEffectCoroutine != null)
+        {
+            StopCoroutine(damageEffectCoroutine);
+        }
+        
+        // 设置面板的alpha值为65/255
+        Color panelColor = damageEffectPanel.color;
+        panelColor.a = 45f/255f; // Unity中alpha值是0-1，所以需要除以255
+        damageEffectPanel.color = panelColor;
+        
+        // 启动淡出协程
+        damageEffectCoroutine = StartCoroutine(FadeOutDamageEffect());
+    }
+    
+    // 淡出效果协程
+    private IEnumerator FadeOutDamageEffect()
+    {
+        // 等待1秒
+        yield return new WaitForSeconds(0.8f);
+        
+        // 将alpha值设回0
+        Color panelColor = damageEffectPanel.color;
+        panelColor.a = 0f;
+        damageEffectPanel.color = panelColor;
+        
+        damageEffectCoroutine = null;
     }
 
     private void Die()
@@ -171,9 +259,6 @@ public class Player_Controller : MonoBehaviour
             canChangeWeapon =false;
 
         }
-
-
-        
     }
     private void OnWeaponExitOver()
     {
@@ -200,8 +285,4 @@ public class Player_Controller : MonoBehaviour
             cameras[i].fieldOfView =value;
         }
     }
-
-
-
-
 }
